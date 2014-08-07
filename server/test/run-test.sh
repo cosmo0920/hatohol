@@ -2,9 +2,9 @@
 
 unset LANG
 
-export BASE_DIR="$(cd $(dirname "$0"); pwd)"
-top_dir="$BASE_DIR/../.."
-top_dir="$(cd "$top_dir"; pwd)"
+cd "$(dirname "$0")"
+export BASE_DIR="$(pwd)"
+top_dir="$(cd ../../; pwd)"
 
 export PATH="$BASE_DIR/../src/.libs:$BASE_DIR/../mlpl/src/.libs:$PATH"
 export LD_LIBRARY_PATH="$BASE_DIR/../src/.libs:$BASE_DIR/../mlpl/src/.libs:$LD_LIBRARY_PATH"
