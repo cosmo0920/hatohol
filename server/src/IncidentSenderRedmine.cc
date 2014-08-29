@@ -150,8 +150,9 @@ void IncidentSenderRedmine::Impl::authenticateCallback(
 	IncidentSenderRedmine *sender
 	  = reinterpret_cast<IncidentSenderRedmine*>(user_data);
 	const IncidentTrackerInfo &tracker = sender->getIncidentTrackerInfo();
-	soup_auth_authenticate(
-	  auth, tracker.userName.c_str(), tracker.password.c_str());
+	Utils::synchronizedSoupAuth(auth,
+				    tracker.userName.c_str(),
+				    tracker.password.c_str());
 }
 
 void IncidentSenderRedmine::Impl::connectSessionSignals(void)

@@ -442,6 +442,17 @@ bool Utils::validIPv6Address(const string &ipAddress)
 	return true;
 }
 
+// issue #290:
+// soup_auth_authenticate() of libsoup-2.40 or before isn't thread-safe.
+static Mutex soupAuthMutex;
+void Utils::synchronizedSoupAuth(SoupAuth *auth,
+				 const char *user,
+				 const char *password)
+{
+	AutoMutex autoLock(&soupAuthMutex);
+	soup_auth_authenticate(auth, user, password);
+}
+
 
 // ---------------------------------------------------------------------------
 // Protected methods

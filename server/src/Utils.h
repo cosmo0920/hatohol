@@ -26,6 +26,7 @@
 #include <typeinfo>
 #include <inttypes.h>
 #include <glib.h>
+#include <libsoup/soup.h>
 #include <StringUtils.h>
 #include <execinfo.h>
 #include "Params.h"
@@ -208,6 +209,10 @@ public:
 	 * @return true if the string is valid, or false.
 	 */
 	static bool validIPv6Address(const std::string &ipAddress);
+
+	static void synchronizedSoupAuth(SoupAuth *auth,
+					 const char *user,
+					 const char *password);
 
 protected:
 	static std::string makeDemangledStackTraceString(
