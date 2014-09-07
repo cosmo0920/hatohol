@@ -19,6 +19,7 @@ libhatohol_common_la_SOURCES = \
 	ItemTablePtr.cc ItemTablePtr.h \
 	JSONBuilderAgent.cc JSONBuilderAgent.h \
 	JSONParserAgent.cc JSONParserAgent.h \
+	JSONParserRewinder.cc JSONParserRewinder.h \
 	Monitroing.h \
 	MonitoringServerInfo.cc MonitoringServerInfo.h \
 	Params.h \
