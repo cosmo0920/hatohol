@@ -37,6 +37,15 @@ struct OpenStackEndPoint {
 	string publicURL;
 };
 
+struct AcquireContext
+{
+	StringVector alarmIds;
+
+	static void clear(AcquireContext *ctx)
+	{
+		ctx->alarmIds.clear();
+	}
+};
 
 struct HapProcessCeilometer::Impl {
 	string osUsername;
@@ -47,6 +56,7 @@ struct HapProcessCeilometer::Impl {
 	MonitoringServerInfo serverInfo;
 	string token;
 	OpenStackEndPoint ceilometerEP;
+	AcquireContext    acquireCtx;
 
 	Impl(void)
 	{
@@ -333,6 +343,9 @@ HatoholError HapProcessCeilometer::parseAlarmElement(
 	grp->addNewItem(ITEM_ID_ZBX_TRIGGERS_HOSTID,      hostId);
 	tablePtr->add(grp);
 
+	// Register the Alarm ID
+	m_impl->acquireCtx.alarmIds.push_back(alarmId);
+
 	return HTERR_OK;
 }
 
@@ -346,6 +359,7 @@ HatoholError HapProcessCeilometer::parseReplyGetAlarmList(
 	}
 
 	const unsigned int count = parser.countElements();
+	m_impl->acquireCtx.alarmIds.reserve(count);
 	for (unsigned int i = 0; i < count; i++) {
 		HatoholError err = parseAlarmElement(parser, tablePtr, i);
 		if (err != HTERR_OK)
@@ -374,6 +388,9 @@ bool HapProcessCeilometer::read(
 
 void HapProcessCeilometer::acquireData(void)
 {
+	Reaper<AcquireContext>
+	  acqCtxCleaner(&m_impl->acquireCtx, AcquireContext::clear);
+
 	MLPL_DBG("acquireData\n");
 	updateAuthTokenIfNeeded();
 	getAlarmList(); // Trigger
