@@ -69,7 +69,9 @@ var HatoholServerEditDialogParameterized = function(params) {
       var param = paramObj[i];
 
       var val;
-      if (param.inputStyle == 'checkBox')
+      if (param.hidden)
+        val = param.default;
+      else if (param.inputStyle == 'checkBox')
         val = $('#' + param.id).prop('checked');
       else
         val = $('#' + param.id).val();
@@ -194,9 +196,17 @@ HatoholServerEditDialogParameterized.prototype.onAppendMainElement = function ()
     }
 
     var s = '';
-    for (var i = 0; i < paramObj.length; i++)
+    for (var i = 0; i < paramObj.length; i++) {
       s += makeFormHTMLOfOneParameter(paramObj[i], i);
+    }
     $('#add-server-param-form').append(s);
+
+    // hide if specified
+    for (var i = 0; i < paramObj.length; i++) {
+      var param = paramObj[i];
+      if (param.hidden)
+        $('#' + param.blockId).hide();
+    }
 
     // set events to fix up state of 'apply' button
     for (var i = 0; i < paramObj.length; i++) {
@@ -208,6 +218,9 @@ HatoholServerEditDialogParameterized.prototype.onAppendMainElement = function ()
   }
 
   function makeFormHTMLOfOneParameter(param, index) {
+    if (param.hidden)
+      return '';
+
     var s = '';
     var label = param.name;
 
@@ -223,13 +236,12 @@ HatoholServerEditDialogParameterized.prototype.onAppendMainElement = function ()
     if (param.hint != undefined)
       hint = param.hint;
 
-    var id = 'server-edit-dialog-param-form-' + index;
-    param.id = id;
+    param.id = 'server-edit-dialog-param-form-' + index;
     s += '<div class="form-group">';
     if (inputStyle == 'text') {
-      s += makeTextInput(id, label, defaultValue, hint);
+      s += makeTextInput(param, label, defaultValue, hint);
     } else if (inputStyle == 'checkBox') {
-      s += makeCheckboxInput(id, label, hint);
+      s += makeCheckboxInput(param, label, hint);
     } else {
       hatoholErrorMsgBox("[Malformed reply] unknown input style: " +
                          inputStyle);
@@ -239,24 +251,24 @@ HatoholServerEditDialogParameterized.prototype.onAppendMainElement = function ()
     return s;
   }
 
-  function makeTextInput(id, label, defaultValue, hint) {
+  function makeTextInput(param, label, defaultValue, hint) {
     s = '';
-    s += '  <label for="' + id  + '" class="col-sm-3 control-label">'
+    s += '  <label for="' + param.id  + '" class="col-sm-3 control-label">'
     s += gettext(label)
     s += '  </label>';
     s += '  <div class="col-sm-9">';
-    s += '    <input type="text" class="form-control" id="' + id +
+    s += '    <input type="text" class="form-control" id="' + param.id +
            '" placeholder="' + hint + '" value="' + defaultValue + '">';
     s += '  </div>'
     return s;
   }
 
-  function makeCheckboxInput(id, label) {
+  function makeCheckboxInput(param, label) {
     s = '';
     s += '  <div class="col-sm-offset-3 class="col-sm-9">';
     s += '    <div class="checkbox">';
     s += '    <label>';
-    s += '      <input type="checkbox" id="' + id + '">' + gettext(label)
+    s += '      <input type="checkbox" id="' + param.id + '">' + gettext(label)
     s += '    </label>';
     s += '    </div>'
     s += '  </div>'
@@ -289,6 +301,8 @@ HatoholServerEditDialogParameterized.prototype.fixupApplyButtonState = function(
   for (i = 0; i < paramObj.length; i++) {
      var param = paramObj[i];
      if (param.allowEmpty)
+       continue;
+     if (param.hidden)
        continue;
      if (!$('#' + param.id).val())
        break;
